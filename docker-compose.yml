@@ -1,0 +1,52 @@
+version: '3.7'
+
+services:
+  mysql:
+    build:
+      context: ./mysql
+      dockerfile: Dockerfile
+    environment:
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
+      MYSQL_USER: "${MYSQL_USER}"
+      MYSQL_PASSWORD: "${MYSQL_PASSWORD}"
+      MYSQL_DATABASE: "${MYSQL_DATABASE}"
+    volumes:
+      - ./data-mysql:/var/lib/mysql
+    restart: unless-stopped
+
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    environment:
+      TZ: ${TZ}
+    volumes:
+      - ./data-owa:/app
+    ports:
+      - ${OWA_PORT}:80
+    depends_on:
+      - fpm-php
+    restart: unless-stopped
+
+  fpm-php:
+    build:
+      context: ./fpm-php
+      dockerfile: Dockerfile
+    environment:
+      TZ: ${TZ}
+    volumes:
+      - ./data-owa:/app
+    depends_on:
+      - mysql
+    restart: unless-stopped
+
+  owa:
+    build:
+      context: ./owa
+      dockerfile: Dockerfile
+      args:
+        OWA_VERSION: "${OWA_VERSION}"
+        APP_UID: "${APP_UID}"
+        APP_GID: "${APP_GID}"
+    volumes:
+      - ./data-owa:/app
