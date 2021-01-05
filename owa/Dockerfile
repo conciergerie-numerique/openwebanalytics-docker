@@ -7,6 +7,7 @@ ARG APP_GID
 RUN apk update \
     && apk --progress add su-exec \
     && apk --progress add shadow \
+    && apk --progress add composer \
     && addgroup --gid ${APP_GID} app-group \
     && useradd --uid ${APP_UID} --gid app-group --shell /bin/sh app-user \
     && mkdir -p /data \
